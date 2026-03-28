@@ -572,7 +572,10 @@ export function createAdminRouter(context) {
                     const poolContext = queueManager?.getPoolContext?.();
                     const page = poolContext?.getFirstPage?.();
                     if (page) {
-                        downloadFn = (url) => useContextDownload(url, page);
+                        const imgDlCfg = config?.backend?.pool?.failover || {};
+                        downloadFn = (url) => useContextDownload(url, page, {
+                            retries: imgDlCfg.imgDlRetry ? (imgDlCfg.imgDlRetryMaxRetries || 3) : 1
+                        });
                     }
                 } catch { /* Pool 未初始化，使用后备方案 */ }
 

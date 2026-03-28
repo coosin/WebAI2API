@@ -87,6 +87,9 @@ const instanceData = computed({
     set: (val) => { settingsStore.workerConfig = val; }
 });
 
+// 获取实例唯一标识（优先 id，没有则用 name）
+const getInstanceKey = (inst) => inst.id || inst.name;
+
 // 批量选择
 const selectedRowKeys = ref([]);
 const rowSelection = computed(() => ({
@@ -121,7 +124,7 @@ const openBatchProxy = () => {
 
 const handleBatchProxySave = async () => {
     const newList = (instanceData.value || []).map(inst => {
-        if (!selectedRowKeys.value.includes(inst.name)) return inst;
+        if (!selectedRowKeys.value.includes(getInstanceKey(inst))) return inst;
         return {
             ...inst,
             proxy: batchProxyForm.value.proxy ? {
@@ -152,7 +155,7 @@ const handleBatchDelete = () => {
         cancelText: '取消',
         async onOk() {
             const newList = (instanceData.value || []).filter(
-                inst => !selectedRowKeys.value.includes(inst.name)
+                inst => !selectedRowKeys.value.includes(getInstanceKey(inst))
             );
             const success = await settingsStore.saveWorkerConfig(newList);
             if (success) {
@@ -225,7 +228,8 @@ const handleEdit = (record) => {
 
 // 删除实例
 const handleDelete = async (record) => {
-    const newList = instanceData.value.filter(item => item.name !== record.name);
+    const key = getInstanceKey(record);
+    const newList = instanceData.value.filter(item => getInstanceKey(item) !== key);
     await settingsStore.saveWorkerConfig(newList);
 };
 
@@ -253,8 +257,9 @@ const handleSaveEdit = async () => {
         // 创建
         newList.push(instanceToSave);
     } else {
-        // 更新 - 用原始 name 查找
-        const index = newList.findIndex(item => item.name === editingInstance.value.name);
+        // 更新 - 用唯一标识查找
+        const editingKey = getInstanceKey(editingInstance.value);
+        const index = newList.findIndex(item => getInstanceKey(item) === editingKey);
         if (index > -1) {
             newList[index] = instanceToSave;
         }
@@ -374,6 +379,32 @@ const handleRemoveWorker = (index) => {
                                 </div>
                             </a-col>
                         </a-row>
+
+                        <a-divider style="margin: 12px 0;" />
+
+                        <a-row :gutter="16">
+                            <a-col :xs="24" :md="12">
+                                <div style="margin-bottom: 8px;">
+                                    <div style="font-weight: 600; margin-bottom: 8px;">图片下载重试</div>
+                                    <div style="font-size: 12px; color: #8c8c8c; margin-bottom: 12px;">
+                                        启用后，图片/视频下载失败时会自动重试下载（不重新生成）
+                                    </div>
+                                    <a-switch v-model:checked="poolConfig.failover.imgDlRetry" />
+                                </div>
+                            </a-col>
+
+                            <a-col :xs="24" :md="12">
+                                <div style="margin-bottom: 8px;">
+                                    <div style="font-weight: 600; margin-bottom: 8px;">下载重试次数</div>
+                                    <div style="font-size: 12px; color: #8c8c8c; margin-bottom: 12px;">
+                                        图片下载失败时的最大重试次数，范围 1-10
+                                    </div>
+                                    <a-input-number v-model:value="poolConfig.failover.imgDlRetryMaxRetries" :min="1"
+                                        :max="10" :disabled="!poolConfig.failover.imgDlRetry" style="width: 100%"
+                                        placeholder="请输入下载重试次数" />
+                                </div>
+                            </a-col>
+                        </a-row>
                     </a-collapse-panel>
                 </a-collapse>
             </div>
@@ -408,7 +439,7 @@ const handleRemoveWorker = (index) => {
 
             <!-- 实例表格 -->
             <a-table :columns="columns" :data-source="instanceData" :pagination="false"
-                :row-selection="rowSelection" row-key="name">
+                :row-selection="rowSelection" :row-key="record => record.id || record.name">
                 <template #bodyCell="{ column, record }">
                     <!-- 实例名称 -->
                     <template v-if="column.key === 'name'">
@@ -609,6 +640,9 @@ const handleRemoveWorker = (index) => {
         <!-- 批量代理设置模态框 -->
         <a-modal v-model:open="batchProxyVisible" title="批量设置代理" okText="确定" cancelText="取消"
             @ok="handleBatchProxySave">
+            <div style="font-size: 12px; color: #8c8c8c; margin-bottom: 16px;">
+                将对选中的 {{ selectedRowKeys.length }} 个实例统一设置代理
+            </div>
             <div style="margin-bottom: 16px;">
                 <a-switch v-model:checked="batchProxyForm.proxy" />
                 <span style="margin-left: 8px;">

@@ -21,22 +21,22 @@ function isRetryableError(message) {
  * @param {import('playwright-core').Page} page - Playwright 页面对象
  * @param {object} [options] - 可选配置
  * @param {number} [options.timeout=60000] - 超时时间（毫秒）
- * @param {number} [options.maxRetries=3] - 最大重试次数
+ * @param {number} [options.retries=3] - 最大重试次数
  * @param {number} [options.retryDelay=1000] - 重试延迟基数（毫秒）
  * @returns {Promise<{ image?: string, imageUrl?: string, error?: string }>} 下载结果（包含原始 URL）
  */
 export async function useContextDownload(url, page, options = {}) {
-    const { timeout = 120000, maxRetries = 3, retryDelay = 1000 } = options;
+    const { timeout = 120000, retries = 3, retryDelay = 1000 } = options;
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             const response = await page.request.get(url, { timeout });
 
             if (!response.ok()) {
                 const status = response.status();
                 // 5xx 错误可重试
-                if (status >= 500 && attempt < maxRetries) {
-                    logger.warn('下载', `HTTP ${status}，重试 ${attempt}/${maxRetries}...`);
+                if (status >= 500 && attempt < retries) {
+                    logger.warn('下载', `HTTP ${status}，重试 ${attempt}/${retries}...`);
                     await new Promise(r => setTimeout(r, retryDelay * attempt));
                     continue;
                 }
@@ -50,8 +50,8 @@ export async function useContextDownload(url, page, options = {}) {
 
             return { image: `data:${mimeType};base64,${base64}`, imageUrl: url };
         } catch (e) {
-            if (isRetryableError(e.message) && attempt < maxRetries) {
-                logger.warn('下载', `${e.message}，重试 ${attempt}/${maxRetries}...`);
+            if (isRetryableError(e.message) && attempt < retries) {
+                logger.warn('下载', `${e.message}，重试 ${attempt}/${retries}...`);
                 await new Promise(r => setTimeout(r, retryDelay * attempt));
                 continue;
             }
