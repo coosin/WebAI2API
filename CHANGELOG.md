@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **适配器**
   - 更新 Arena 的模型列表
+  - 更新 ChatGPT 文本生成的模型列表
 
 ## [3.6.4] - 2026-04-07
 

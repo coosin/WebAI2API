@@ -265,12 +265,10 @@ export const manifest = {
 
     // 模型列表
     models: [
-        { id: 'gpt-5.2', codeName: 'GPT-5.2 Instant', imagePolicy: 'optional' },
-        { id: 'gpt-5.2-thinking', codeName: 'GPT-5.2 Thinking', imagePolicy: 'optional' },
-        { id: 'gpt-5.1', codeName: 'GPT-5.1 Instant', imagePolicy: 'optional' },
-        { id: 'gpt-5.1-thinking', codeName: 'GPT-5.1 Thinking', imagePolicy: 'optional' },
-        { id: 'gpt-5', codeName: 'GPT-5 Instant', imagePolicy: 'optional' },
-        { id: 'gpt-5-thinking', codeName: 'GPT-5 Thinking', imagePolicy: 'optional' },
+        { id: 'gpt-5.4', codeName: 'GPT-5.4 Instant', imagePolicy: 'optional' },
+        { id: 'gpt-5.4-thinking', codeName: 'GPT-5.4 Thinking', imagePolicy: 'optional' },
+        { id: 'gpt-5.3', codeName: 'GPT-5.3 Instant', imagePolicy: 'optional' },
+        { id: 'gpt-5.3-thinking', codeName: 'GPT-5.3 Thinking', imagePolicy: 'optional' },
     ],
 
     // 无需导航处理器
