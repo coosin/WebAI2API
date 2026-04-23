@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 修复 ChatGPT 缺少系统提示词的问题
   - 尝试修复 ChatGPT 选择模型的问题 （目前应该是灰度测试，有些账号界面不一样，并且作者没有会员账号仅为猜测修复）
 
+### ✨ Added
+- **WebUI**
+  - Gemini 和 ChatGPT 的临时对话模式开关（现可以在适配器设置中单独开关）
+
 ## [3.6.6] - 2026-04-12
 
 ### 🐛 Fixed

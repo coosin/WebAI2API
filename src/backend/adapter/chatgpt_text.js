@@ -16,7 +16,7 @@ import {
 import { logger } from '../../utils/logger.js';
 
 // --- 配置常量 ---
-const TARGET_URL = 'https://chatgpt.com/?temporary-chat=true'; // 感谢 @zhongjianhua163 提供方案
+const TARGET_URL = 'https://chatgpt.com/'; // 基础URL
 const INPUT_SELECTOR = '.ProseMirror';
 
 /**
@@ -85,8 +85,10 @@ async function generate(context, prompt, imgPaths, modelId, meta = {}) {
     const sendBtnLocator = page.getByRole('button', { name: 'Send prompt' });
 
     try {
+        const useTemp = config?.backend?.adapter?.chatgpt_text?.temporaryChat || false;
+        const targetUrl = useTemp ? 'https://chatgpt.com/?temporary-chat=true' : 'https://chatgpt.com/'; // 感谢 @zhongjianhua163 提供临时对话方案
         logger.info('适配器', '开启新会话...', meta);
-        await gotoWithCheck(page, TARGET_URL);
+        await gotoWithCheck(page, targetUrl);
 
         // 1. 等待输入框加载
         await waitForInput(page, INPUT_SELECTOR, { click: false });
@@ -258,9 +260,21 @@ export const manifest = {
     displayName: 'ChatGPT (文本生成)',
     description: '使用 ChatGPT 官网生成文本，支持多模型切换和图片上传。需要已登录的 ChatGPT 账户，若需要选择模型，请使用会员账号 (包含 K12 教室认证账号)。',
 
+    // 配置项模式
+    configSchema: [
+        {
+            key: 'temporaryChat',
+            label: '临时对话',
+            type: 'boolean',
+            default: false,
+            note: '开启后将使用临时对话模式 (?temporary-chat=true)'
+        }
+    ],
+
     // 入口 URL
     getTargetUrl(config, workerConfig) {
-        return TARGET_URL;
+        const useTemp = config?.backend?.adapter?.chatgpt_text?.temporaryChat || false;
+        return useTemp ? 'https://chatgpt.com/?temporary-chat=true' : 'https://chatgpt.com/';
     },
 
     // 模型列表
